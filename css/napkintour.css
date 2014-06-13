@@ -1,0 +1,42 @@
+﻿#napkinTourOverlay {
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 99995;
+    display: none;
+    width: 100%;
+    height: 100%;
+    background: #000000;
+    background: rgba(0, 0, 0, 0.8);
+    filter: alpha(opacity=80); /* This seems broken by jQuery's fadeIn.  So it's just redundant filter now*/
+}
+
+    #napkinTourOverlay img.tourImage {
+        position: absolute;
+        z-index: 99996;
+    }
+
+.napkintour-expose {
+    position: relative;
+    z-index: 99999;
+    -moz-box-shadow: 0 0 3px #ccc;
+    -webkit-box-shadow: 0 0 3px #ccc;
+    box-shadow: 0 0 3px #ccc;
+}
+
+#napkinTourOverlay #napkinTourClose {
+    position: absolute;
+    display: none;
+    opacity: .9;
+    filter: alpha(opacity=90);
+}
+
+    #napkinTourOverlay #napkinTourClose:hover {
+        opacity: 1;
+        filter: alpha(opacity=100);
+    }
