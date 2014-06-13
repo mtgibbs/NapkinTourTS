@@ -176,18 +176,13 @@ module Napkin.Tour {
         }
     }
 
-    class Offset {
-        public left: number;
-        public top: number;
-
-        constructor(left: number, top: number) {
-            this.left = left;
-            this.top = left;
-        }
+    interface IOffset {
+        left: number;
+        top: number;
     }
 
-    function calculateImagePosition(image, control, pointerDirection?: ArrowDirection, pointerCoord?: Coordinate, distanceBetween?: number): Offset {
-        var offset = new Offset(0, 0);
+    function calculateImagePosition(image, control, pointerDirection?: ArrowDirection, pointerCoord?: Coordinate, distanceBetween?: number): IOffset {
+        var offset = { left: 0, top:0 };
 
         // default the distance between to be something "nice" if none is specified
         // this is important since nothing ever specifies it right now!
