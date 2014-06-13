@@ -35,7 +35,7 @@ module Napkin.Tour {
 
                 var isExitTourImageDefined = typeof self._exitTourImage !== 'undefined' && self._exitTourImage !== null;
 
-                // if the called defined an exit image, place it on the screen and bind a click event to cancel the tour
+                // if the call defined an exit image, place it on the screen and bind a click event to cancel the tour
                 if (isExitTourImageDefined) {
 
                     closeImg.attr('src', self._exitTourImage.imageHolder.imagePath);
@@ -46,44 +46,44 @@ module Napkin.Tour {
 
                     closeImg.show();
 
-                    closeImg.click(function (e) {
+                    closeImg.click((e) => {
                         e.stopPropagation();
                         tourOverlay.fadeOut(800);
                     });
                 }
 
                 // keep people from dragging the images around
-                $(img).on('dragstart', function (event) { event.preventDefault(); });
-                $(closeImg).on('dragstart', function (event) { event.preventDefault(); });
+                $(img).on('dragstart', (event) => { event.preventDefault(); });
+                $(closeImg).on('dragstart', (event) => { event.preventDefault(); });
 
                 var tourStep = self.nextStep();
                 tourStep.show();
 
-                tourOverlay.fadeIn(800).promise().done(function () {
+                tourOverlay.fadeIn(800).promise().done(() => {
 
                     // bind window resize function to recalculate the current tourstep
-                    $(window).resize(function () {
+                    $(window).resize(() => {
                         tourStep.show();
                     });
 
                     // bind the click to pop the rest of the tour sequences after the first
-                    tourOverlay.click(function () {
+                    tourOverlay.click(() => {
 
                         // if there's another sequence, hide the old one before exposing the new one.
                         if (self.hasNextStep()) {
 
                             var hideExitImage = isExitTourImageDefined && !self._exitTourImage.isVisibleAfterFirstStep;
                             if (hideExitImage) {
-                                closeImg.animate({ opacity: "0" }, 300).promise().done(function () {
+                                closeImg.animate({ opacity: "0" }, 300).promise().done(() => {
                                     closeImg.hide();
                                 });
                             }
 
                             $(tourStep.controlToHighlight).first().removeClass('napkintour-expose');
                             tourStep = self.nextStep();
-                            // fade out the existing slide
 
-                            img.fadeOut(300, function () {
+                            // fade out the existing slide
+                            img.fadeOut(300, () => {
                                 tourStep.show();
                             });
 
@@ -170,7 +170,7 @@ module Napkin.Tour {
         public x: number;
         public y: number;
 
-        constructor(x, y) {
+        constructor(x: number, y: number) {
             this.x = x;
             this.y = y;
         }
@@ -186,7 +186,7 @@ module Napkin.Tour {
         }
     }
 
-    function calculateImagePosition(image, control, pointerDirection : ArrowDirection, pointerCoord, distanceBetween?) : Offset {
+    function calculateImagePosition(image, control, pointerDirection?: ArrowDirection, pointerCoord?: Coordinate, distanceBetween?: number): Offset {
         var offset = new Offset(0, 0);
 
         // default the distance between to be something "nice" if none is specified
