@@ -35,6 +35,9 @@ module Napkin.Tour {
 
                 var isExitTourImageDefined = typeof self._exitTourImage !== 'undefined' && self._exitTourImage !== null;
 
+                var tourStep = self.nextStep();
+                var showStep = () => { tourStep.show(); };
+
                 // if the call defined an exit image, place it on the screen and bind a click event to cancel the tour
                 if (isExitTourImageDefined) {
 
@@ -48,6 +51,8 @@ module Napkin.Tour {
 
                     closeImg.click((e) => {
                         e.stopPropagation();
+                        $(tourStep.controlToHighlight).first().removeClass('napkintour-expose');
+                        $(window).unbind('resize', showStep);
                         tourOverlay.fadeOut(800);
                     });
                 }
@@ -55,15 +60,12 @@ module Napkin.Tour {
                 // keep people from dragging the images around
                 $(img).on('dragstart', (event) => { event.preventDefault(); });
                 $(closeImg).on('dragstart', (event) => { event.preventDefault(); });
-
-                var tourStep = self.nextStep();
+                
                 tourStep.show();
 
                 tourOverlay.fadeIn(800).promise().done(() => {
 
                     // bind window resize function to recalculate the current tourstep
-
-                    var showStep = () => { tourStep.show(); };
                     $(window).resize(showStep);
 
                     // bind the click to pop the rest of the tour sequences after the first
