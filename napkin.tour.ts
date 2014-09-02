@@ -62,9 +62,9 @@ module Napkin.Tour {
                 tourOverlay.fadeIn(800).promise().done(() => {
 
                     // bind window resize function to recalculate the current tourstep
-                    $(window).resize(() => {
-                        tourStep.show();
-                    });
+
+                    var showStep = () => { tourStep.show(); };
+                    $(window).resize(showStep);
 
                     // bind the click to pop the rest of the tour sequences after the first
                     tourOverlay.click(() => {
@@ -89,6 +89,7 @@ module Napkin.Tour {
 
                         } else {
                             $(tourStep.controlToHighlight).first().removeClass('napkintour-expose');
+                            $(window).unbind('resize', showStep);
                             // tour is over, go home
                             tourOverlay.fadeOut(800);
                         }
@@ -124,7 +125,7 @@ module Napkin.Tour {
                 image.css('height', this.imageHolder.height);
                 image.css('width', this.imageHolder.width);
 
-                var offset = calculateImagePosition(image, control, this.arrowDirection, this.arrowPointCoordinates);
+                var offset = TourStep.calculateImagePosition(image, control, this.arrowDirection, this.arrowPointCoordinates);
 
                 if (typeof offset !== 'undefined' && offset !== null) {
                     image.css('left', offset.left);
@@ -133,6 +134,117 @@ module Napkin.Tour {
 
                 image.fadeIn(300);
             }
+        }
+
+        private static calculateImagePosition(image, control, pointerDirection?: ArrowDirection, pointerCoord?: Coordinate, distanceBetween?: number): IOffset {
+            var offset = { left: 0, top: 0 };
+
+            // default the distance between to be something "nice" if none is specified
+            // this is important since nothing ever specifies it right now!
+            distanceBetween = typeof distanceBetween !== 'undefined' && distanceBetween !== null ? distanceBetween : 20;
+
+            var imageWidth = image.width();
+            var imageHeight = image.height();
+
+            var controlHasOffset = typeof control.offset() !== 'undefined' && control.offset() !== null;
+            var pointerCoordDefined = typeof pointerCoord !== 'undefined' && pointerCoord !== null;
+
+            // determine the offsets for the edges of the control
+            var leftEdge = controlHasOffset ? control.offset().left : 0;
+            var rightEdge = leftEdge + control.outerWidth();
+            var topEdge = controlHasOffset ? control.offset().top : 0;
+            var bottomEdge = topEdge + control.outerHeight();
+            var xMiddlePoint = controlHasOffset ? control.offset().left + control.outerWidth() / 2 : 0;
+            var yMiddlePoint = controlHasOffset ? control.offset().top + control.outerHeight() / 2 : 0;
+
+            var pointerY = 0;
+            var pointerX = 0;
+
+            switch (pointerDirection) {
+                case ArrowDirection.NE:
+
+                    pointerY = pointerCoordDefined ? pointerCoord.y : 0;
+                    pointerX = pointerCoordDefined ? pointerCoord.x : imageWidth;
+
+                    offset.left = leftEdge - pointerX;
+                    offset.top = bottomEdge - pointerY / 2;
+
+                    break;
+
+                case ArrowDirection.NW:
+
+                    pointerY = pointerCoordDefined ? pointerCoord.y : 0;
+                    pointerX = pointerCoordDefined ? pointerCoord.x : 0;
+
+                    offset.left = leftEdge + imageWidth + pointerX;
+                    offset.top = bottomEdge - pointerY / 2;
+                    break;
+
+                case ArrowDirection.SE:
+
+                    pointerY = pointerCoordDefined ? pointerCoord.y : imageHeight;
+                    pointerX = pointerCoordDefined ? pointerCoord.x : imageWidth;
+
+                    offset.left = leftEdge - pointerX;
+                    offset.top = topEdge - imageHeight + pointerY / 2;
+                    break;
+
+                case ArrowDirection.SW:
+
+                    pointerY = pointerCoordDefined ? pointerCoord.y : imageHeight;
+                    pointerX = pointerCoordDefined ? pointerCoord.x : 0;
+
+                    offset.left = rightEdge + imageWidth + pointerX;
+                    offset.top = topEdge - imageHeight + pointerY / 2;
+                    break;
+
+                case ArrowDirection.N:
+
+                    pointerY = pointerCoordDefined ? pointerCoord.y : 0;
+                    pointerX = pointerCoordDefined ? pointerCoord.x : imageWidth / 2;
+
+                    offset.left = xMiddlePoint - pointerX;
+                    offset.top = bottomEdge - pointerY + distanceBetween;
+
+                    break;
+
+                case ArrowDirection.S:
+
+                    pointerY = pointerCoordDefined ? pointerCoord.y : bottomEdge;
+                    pointerX = pointerCoordDefined ? pointerCoord.x : imageWidth / 2;
+
+                    offset.left = xMiddlePoint - pointerX;
+                    offset.top = topEdge - imageHeight + pointerY - distanceBetween;
+
+                    break;
+
+                case ArrowDirection.E:
+
+                    pointerY = pointerCoordDefined ? pointerCoord.y : imageHeight / 2;
+                    pointerX = pointerCoordDefined ? pointerCoord.x : imageWidth;
+
+                    offset.left = leftEdge - pointerX - distanceBetween;
+                    offset.top = yMiddlePoint - pointerY;
+
+                    break;
+
+                case ArrowDirection.W:
+
+                    pointerY = pointerCoordDefined ? pointerCoord.y : imageHeight / 2;
+                    pointerX = pointerCoordDefined ? pointerCoord.x : 0;
+
+                    offset.left = rightEdge - pointerX + distanceBetween;
+                    offset.top = yMiddlePoint - pointerY;
+                    break;
+
+                default:
+
+                    offset.left = pointerCoordDefined ? pointerCoord.x : 0;
+                    offset.top = pointerCoordDefined ? pointerCoord.y : 0;
+
+            }
+
+            return offset;
         }
     }
 
@@ -179,116 +291,5 @@ module Napkin.Tour {
     interface IOffset {
         left: number;
         top: number;
-    }
-
-    function calculateImagePosition(image, control, pointerDirection?: ArrowDirection, pointerCoord?: Coordinate, distanceBetween?: number): IOffset {
-        var offset = { left: 0, top:0 };
-
-        // default the distance between to be something "nice" if none is specified
-        // this is important since nothing ever specifies it right now!
-        distanceBetween = typeof distanceBetween !== 'undefined' && distanceBetween !== null ? distanceBetween : 20;
-
-        var imageWidth = image.width();
-        var imageHeight = image.height();
-
-        var controlHasOffset = typeof control.offset() !== 'undefined' && control.offset() !== null;
-        var pointerCoordDefined = typeof pointerCoord !== 'undefined' && pointerCoord !== null;
-
-        // determine the offsets for the edges of the control
-        var leftEdge = controlHasOffset ? control.offset().left : 0;
-        var rightEdge = leftEdge + control.outerWidth();
-        var topEdge = controlHasOffset ? control.offset().top : 0;
-        var bottomEdge = topEdge + control.outerHeight();
-        var xMiddlePoint = controlHasOffset ? control.offset().left + control.outerWidth() / 2 : 0;
-        var yMiddlePoint = controlHasOffset ? control.offset().top + control.outerHeight() / 2 : 0;
-
-        var pointerY = 0;
-        var pointerX = 0;
-
-        switch (pointerDirection) {
-            case ArrowDirection.NE:
-
-                pointerY = pointerCoordDefined ? pointerCoord.y : 0;
-                pointerX = pointerCoordDefined ? pointerCoord.x : imageWidth;
-
-                offset.left = leftEdge - pointerX;
-                offset.top = bottomEdge - pointerY / 2;
-
-                break;
-
-            case ArrowDirection.NW:
-
-                pointerY = pointerCoordDefined ? pointerCoord.y : 0;
-                pointerX = pointerCoordDefined ? pointerCoord.x : 0;
-
-                offset.left = leftEdge + imageWidth + pointerX;
-                offset.top = bottomEdge - pointerY / 2;
-                break;
-
-            case ArrowDirection.SE:
-
-                pointerY = pointerCoordDefined ? pointerCoord.y : imageHeight;
-                pointerX = pointerCoordDefined ? pointerCoord.x : imageWidth;
-
-                offset.left = leftEdge - pointerX;
-                offset.top = topEdge - imageHeight + pointerY / 2;
-                break;
-
-            case ArrowDirection.SW:
-
-                pointerY = pointerCoordDefined ? pointerCoord.y : imageHeight;
-                pointerX = pointerCoordDefined ? pointerCoord.x : 0;
-
-                offset.left = rightEdge + imageWidth + pointerX;
-                offset.top = topEdge - imageHeight + pointerY / 2;
-                break;
-
-            case ArrowDirection.N:
-
-                pointerY = pointerCoordDefined ? pointerCoord.y : 0;
-                pointerX = pointerCoordDefined ? pointerCoord.x : imageWidth / 2;
-
-                offset.left = xMiddlePoint - pointerX;
-                offset.top = bottomEdge - pointerY + distanceBetween;
-
-                break;
-
-            case ArrowDirection.S:
-
-                pointerY = pointerCoordDefined ? pointerCoord.y : bottomEdge;
-                pointerX = pointerCoordDefined ? pointerCoord.x : imageWidth / 2;
-
-                offset.left = xMiddlePoint - pointerX;
-                offset.top = topEdge - imageHeight + pointerY - distanceBetween;
-
-                break;
-
-            case ArrowDirection.E:
-
-                pointerY = pointerCoordDefined ? pointerCoord.y : imageHeight / 2;
-                pointerX = pointerCoordDefined ? pointerCoord.x : imageWidth;
-
-                offset.left = leftEdge - pointerX - distanceBetween;
-                offset.top = yMiddlePoint - pointerY;
-
-                break;
-
-            case ArrowDirection.W:
-
-                pointerY = pointerCoordDefined ? pointerCoord.y : imageHeight / 2;
-                pointerX = pointerCoordDefined ? pointerCoord.x : 0;
-
-                offset.left = rightEdge - pointerX + distanceBetween;
-                offset.top = yMiddlePoint - pointerY;
-                break;
-
-            default:
-
-                offset.left = pointerCoordDefined ? pointerCoord.x : 0;
-                offset.top = pointerCoordDefined ? pointerCoord.y : 0;
-
-        }
-
-        return offset;
     }
 }
